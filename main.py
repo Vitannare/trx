@@ -74,7 +74,7 @@ def save_to_file(filename, data):
 def log_message(message):
     print(message)  # Print log message to console
     with open("Log.txt", 'a') as log_file:
-        log_file.write(f"{datetime.now()} - {message}
+        log_file.write(f"{datetime.now()} - {message}\n")
 ")
 ")
 
