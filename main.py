@@ -50,9 +50,6 @@ def send_transaction(web3, private_key, to_address, amount):
         if balance < total_cost:
             raise ValueError(f"Insufficient funds for transaction. Balance: {balance / 10**18} ETH, Required: {total_cost / 10**18} ETH")
 
-        # Логирование значений транзакции
-        log_message(f"Sending from {account.address} to {to_address} with amount {amount} ETH, nonce {nonce}, gas_price {gas_price}, gas_limit {gas_limit}")
-
         tx = {
             'nonce': nonce,
             'to': to_address,
@@ -76,6 +73,9 @@ def save_to_file(filename, data):
         f.write(data + "\n")
 
 def log_message(message):
+    # Skip logging messages that start with "sending from"
+    if message.startswith("sending from"):
+        return
     print(message)  # Print log message to console
     with open("Log.txt", 'a') as log_file:
         log_file.write(f"{datetime.now()} - {message}\n")
@@ -96,6 +96,7 @@ def random_pause():
     time.sleep(pause_duration)
 
 def get_random_network():
+    # Select a random network each time it's called
     selected_network = random.choice(list(NETWORKS.keys()))
     log_message(f"Randomly selected network: {selected_network}")
     web3 = Web3(Web3.HTTPProvider(NETWORKS[selected_network]))
