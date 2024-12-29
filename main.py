@@ -75,8 +75,6 @@ def log_message(message):
     print(message)  # Print log message to console
     with open("Log.txt", 'a') as log_file:
         log_file.write(f"{datetime.now()} - {message}\n")
-")
-")
 
 def initialize_log_file():
     try:
