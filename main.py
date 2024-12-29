@@ -76,6 +76,7 @@ def log_message(message):
     with open("Log.txt", 'a') as log_file:
         log_file.write(f"{datetime.now()} - {message}
 ")
+")
 
 def initialize_log_file():
     try:
