@@ -136,7 +136,7 @@ for private_key in private_keys:
     if balance > 0.002:
         log_message(f"Wallet {account.address} is valid and has balance: {balance} ETH.")
         for wallet in wallets:
-            amount_to_send = random.uniform(0.00000100, 0.00000800)
+            amount_to_send = random.uniform(0.000000100, 0.000000800)
 
             try:
                 tx_hash = send_transaction(web3, private_key, wallet["address"], amount_to_send)
