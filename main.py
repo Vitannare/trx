@@ -133,7 +133,7 @@ for private_key in private_keys:
     account = web3.eth.account.from_key(private_key)
     balance = get_balance(web3, account.address)
 
-    if balance > 0.002:
+    if balance > 0.001:
         log_message(f"Wallet {account.address} is valid and has balance: {balance} ETH.")
         for wallet in wallets:
             amount_to_send = random.uniform(0.000000100, 0.000000800)
