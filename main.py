@@ -50,6 +50,9 @@ def send_transaction(web3, private_key, to_address, amount):
         if balance < total_cost:
             raise ValueError(f"Insufficient funds for transaction. Balance: {balance / 10**18} ETH, Required: {total_cost / 10**18} ETH")
 
+        # Логирование значений транзакции
+        log_message(f"Sending from {account.address} to {to_address} with amount {amount} ETH, nonce {nonce}, gas_price {gas_price}, gas_limit {gas_limit}")
+
         tx = {
             'nonce': nonce,
             'to': to_address,
@@ -57,6 +60,7 @@ def send_transaction(web3, private_key, to_address, amount):
             'gas': gas_limit,
             'gasPrice': gas_price
         }
+
         signed_tx = web3.eth.account.sign_transaction(tx, private_key)
         tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
         return web3.to_hex(tx_hash)
@@ -124,14 +128,12 @@ if web3 and not web3.is_connected():
     log_message("Failed to connect to the selected network.")
     raise ConnectionError("RPC connection failed.")
 
-# Generate wallets
+# Generate wallets (no logging or pauses here)
 wallets = [generate_wallet() for _ in range(num_transactions)]
 for wallet in wallets:
     save_to_file("new_privates.txt", wallet["private_key"])
     save_to_file("new_mnemonic.txt", wallet["mnemonic"])
     save_to_file("new_address.txt", wallet["address"])
-    log_message(f"Generated wallet: {wallet['address']}")
-    random_pause()
 
 # Load private keys from file
 with open("privates.txt", 'r') as f:
@@ -153,7 +155,7 @@ for private_key in private_keys:
             try:
                 tx_hash = send_transaction(web3, private_key, wallet["address"], amount_to_send)
                 log_message(f"[92mSUCCESS[0m: Transaction sent to {wallet['address']}: {tx_hash}")
-                random_pause()
+                random_pause()  # Pause only during transaction sending
             except ValueError as e:
                 log_message(f"[91mERROR[0m: Failed to send transaction: {e}")
                 break
