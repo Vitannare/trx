@@ -72,8 +72,10 @@ def save_to_file(filename, data):
         f.write(data + "\n")
 
 def log_message(message):
+    print(message)  # Print log message to console
     with open("Log.txt", 'a') as log_file:
-        log_file.write(f"{datetime.now()} - {message}\n")
+        log_file.write(f"{datetime.now()} - {message}
+")
 
 def initialize_log_file():
     try:
@@ -90,6 +92,15 @@ def random_pause():
     log_message(f"Pausing for {pause_duration} seconds...")
     time.sleep(pause_duration)
 
+def get_random_network():
+    selected_network = random.choice(list(NETWORKS.keys()))
+    log_message(f"Randomly selected network: {selected_network}")
+    web3 = Web3(Web3.HTTPProvider(NETWORKS[selected_network]))
+    if not web3.is_connected():
+        log_message(f"Failed to connect to the selected network: {selected_network}")
+        raise ConnectionError(f"RPC connection to {selected_network} failed.")
+    return web3
+
 # Initialize log file
 initialize_log_file()
 
@@ -103,15 +114,14 @@ network_choice = int(input("Your choice: "))
 
 # Select network
 if network_choice == 5:
-    selected_network = random.choice(list(NETWORKS.keys()))
+    selected_network = "Random"
 else:
     selected_network = list(NETWORKS.keys())[network_choice - 1]
 
 log_message(f"Selected network: {selected_network}")
-web3 = Web3(Web3.HTTPProvider(NETWORKS[selected_network]))
+web3 = None if selected_network == "Random" else Web3(Web3.HTTPProvider(NETWORKS[selected_network]))
 
-# Check connection
-if not web3.is_connected():
+if web3 and not web3.is_connected():
     log_message("Failed to connect to the selected network.")
     raise ConnectionError("RPC connection failed.")
 
@@ -130,6 +140,9 @@ with open("privates.txt", 'r') as f:
 
 # Process transactions
 for private_key in private_keys:
+    if selected_network == "Random":
+        web3 = get_random_network()
+
     account = web3.eth.account.from_key(private_key)
     balance = get_balance(web3, account.address)
 
@@ -140,10 +153,10 @@ for private_key in private_keys:
 
             try:
                 tx_hash = send_transaction(web3, private_key, wallet["address"], amount_to_send)
-                log_message(f"Transaction sent to {wallet['address']}: {tx_hash}")
+                log_message(f"[92mSUCCESS[0m: Transaction sent to {wallet['address']}: {tx_hash}")
                 random_pause()
             except ValueError as e:
-                log_message(f"Failed to send transaction: {e}")
+                log_message(f"[91mERROR[0m: Failed to send transaction: {e}")
                 break
     else:
         log_message(f"Wallet {account.address} has insufficient balance. Stopping script.")
