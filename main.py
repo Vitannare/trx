@@ -122,11 +122,6 @@ else:
     selected_network = list(NETWORKS.keys())[network_choice - 1]
 
 log_message(f"Selected network: {selected_network}")
-web3 = None if selected_network == "Random" else Web3(Web3.HTTPProvider(NETWORKS[selected_network]))
-
-if web3 and not web3.is_connected():
-    log_message("Failed to connect to the selected network.")
-    raise ConnectionError("RPC connection failed.")
 
 # Generate wallets (no logging or pauses here)
 wallets = [generate_wallet() for _ in range(num_transactions)]
@@ -142,6 +137,7 @@ with open("privates.txt", 'r') as f:
 # Process transactions
 for private_key in private_keys:
     if selected_network == "Random":
+        # Для каждой транзакции выбираем случайную сеть
         web3 = get_random_network()
 
     account = web3.eth.account.from_key(private_key)
