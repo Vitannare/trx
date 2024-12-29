@@ -34,17 +34,17 @@ def send_transaction(web3, private_key, to_address, amount):
     try:
         account = web3.eth.account.from_key(private_key)
         nonce = web3.eth.get_transaction_count(account.address)
-        gas_price = web3.eth.gas_price
+        gas_price = web3.eth.gas_price  # Get current gas price
         amount_in_wei = web3.to_wei(amount, 'ether')
 
-        # Оценка лимита газа
+        # Estimate gas limit
         gas_limit = web3.eth.estimate_gas({
             'from': account.address,
             'to': to_address,
             'value': amount_in_wei
         })
 
-        # Проверка баланса
+        # Check balance
         balance = web3.eth.get_balance(account.address)
         total_cost = gas_limit * gas_price + amount_in_wei
         if balance < total_cost:
