@@ -35,17 +35,18 @@ def send_transaction(web3, private_key, to_address, amount):
         account = web3.eth.account.from_key(private_key)
         nonce = web3.eth.get_transaction_count(account.address)
         gas_price = web3.eth.gas_price
-        gas_limit = 21000
-
-        # Estimate gas fee in wei
-        gas_fee_estimate = gas_limit * gas_price
-
-        # Convert amount to wei
         amount_in_wei = web3.to_wei(amount, 'ether')
 
-        # Check if the balance is sufficient for the transaction
-        balance = web3.eth.get_balance(account.address)  # Balance in wei
-        total_cost = gas_fee_estimate + amount_in_wei
+        # Оценка лимита газа
+        gas_limit = web3.eth.estimate_gas({
+            'from': account.address,
+            'to': to_address,
+            'value': amount_in_wei
+        })
+
+        # Проверка баланса
+        balance = web3.eth.get_balance(account.address)
+        total_cost = gas_limit * gas_price + amount_in_wei
         if balance < total_cost:
             raise ValueError(f"Insufficient funds for transaction. Balance: {balance / 10**18} ETH, Required: {total_cost / 10**18} ETH")
 
@@ -61,6 +62,9 @@ def send_transaction(web3, private_key, to_address, amount):
         return web3.to_hex(tx_hash)
     except ValueError as e:
         log_message(f"Transaction failed: {e}")
+        raise
+    except Exception as e:
+        log_message(f"Unexpected error: {e}")
         raise
 
 def save_to_file(filename, data):
@@ -106,6 +110,11 @@ else:
 log_message(f"Selected network: {selected_network}")
 web3 = Web3(Web3.HTTPProvider(NETWORKS[selected_network]))
 
+# Check connection
+if not web3.is_connected():
+    log_message("Failed to connect to the selected network.")
+    raise ConnectionError("RPC connection failed.")
+
 # Generate wallets
 wallets = [generate_wallet() for _ in range(num_transactions)]
 for wallet in wallets:
@@ -136,7 +145,6 @@ for private_key in private_keys:
             except ValueError as e:
                 log_message(f"Failed to send transaction: {e}")
                 break
-
     else:
         log_message(f"Wallet {account.address} has insufficient balance. Stopping script.")
         break
